@@ -8,18 +8,19 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![deny(warnings)]
+use test::black_box;
+use test::Bencher;
 
-#![feature(flt2dec)]
-#![feature(slice_patterns)]
-#![feature(test)]
-
-extern crate core;
-extern crate test;
-
-mod any;
-mod hash;
-mod iter;
-mod num;
-mod ops;
-mod slice;
+#[bench]
+fn binary_search(b: &mut Bencher) {
+    let mut v = Vec::new();
+    for i in 0..999 {
+      v.push(i);
+    }
+    let mut i = 0;
+    b.iter(move || {
+        i += 1299827;
+        i %= 999;
+        black_box(v.binary_search(&i).unwrap());
+    })
+}
