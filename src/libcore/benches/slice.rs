@@ -13,14 +13,11 @@ use test::Bencher;
 
 #[bench]
 fn binary_search(b: &mut Bencher) {
-    let mut v = Vec::new();
-    for i in 0..999 {
-      v.push(i);
-    }
-    let mut i = 0;
+    let v = (0..999).collect::<Vec<_>>();
+    let mut i = 0usize;
     b.iter(move || {
-        i += 1299827;
-        i %= 999;
-        black_box(v.binary_search(&i).unwrap());
+        // LCG constants from https://en.wikipedia.org/wiki/Numerical_Recipes.
+        i = i.wrapping_mul(1664525).wrapping_add(1013904223);
+        black_box(v.binary_search(&(i % 999)).unwrap());
     })
 }
