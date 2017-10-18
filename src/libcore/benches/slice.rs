@@ -17,16 +17,16 @@ enum Cache {
     L3,
 }
 
-fn binary_search(b: &mut Bencher, cache: Cache) {
+fn binary_search<F>(b: &mut Bencher, cache: Cache, mapper: F)
+  where F: FnMut(usize) -> usize {
     let size = match cache {
         Cache::L1 => 1000, // 8kb
         Cache::L2 => 10_000,  // 80kb
         Cache::L3 => 1_000_000,  // 8Mb
     };
-    // Only store even numbers.
-    let v = (0..size).map(|i| i * 2).collect::<Vec<_>>();
+    let v = (0..size).map(mapper).collect::<Vec<_>>();
     let mut r = 0usize;
-    let max = size * 2;
+    let max = v.last().unwrap();
     b.iter(move || {
         // LCG constants from https://en.wikipedia.org/wiki/Numerical_Recipes.
         r = r.wrapping_mul(1664525).wrapping_add(1013904223);
@@ -37,16 +37,31 @@ fn binary_search(b: &mut Bencher, cache: Cache) {
 }
 
 #[bench]
-fn binary_search_hit_l1(b: &mut Bencher) {
-    binary_search(b, Cache::L1);
+fn binary_search_l1(b: &mut Bencher) {
+    binary_search(b, Cache::L1, |i| i * 2);
 }
 
 #[bench]
-fn binary_search_hit_l2(b: &mut Bencher) {
-    binary_search(b, Cache::L2);
+fn binary_search_l2(b: &mut Bencher) {
+    binary_search(b, Cache::L2, |i| i * 2);
 }
 
 #[bench]
-fn binary_search_hit_l3(b: &mut Bencher) {
-    binary_search(b, Cache::L3);
+fn binary_search_l3(b: &mut Bencher) {
+    binary_search(b, Cache::L3, |i| i * 2);
+}
+
+#[bench]
+fn binary_search_l1_with_dups(b: &mut Bencher) {
+    binary_search(b, Cache::L1, |i| i / 16 * 16);
+}
+
+#[bench]
+fn binary_search_l2_with_dups(b: &mut Bencher) {
+    binary_search(b, Cache::L2, |i| i / 16 * 16);
+}
+
+#[bench]
+fn binary_search_l3_with_dups(b: &mut Bencher) {
+    binary_search(b, Cache::L3, |i| i / 16 * 16);
 }
