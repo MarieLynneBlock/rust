@@ -26,7 +26,7 @@ fn binary_search<F>(b: &mut Bencher, cache: Cache, mapper: F)
     };
     let v = (0..size).map(mapper).collect::<Vec<_>>();
     let mut r = 0usize;
-    let max = v.last().unwrap();
+    let max = *v.last().unwrap();
     b.iter(move || {
         // LCG constants from https://en.wikipedia.org/wiki/Numerical_Recipes.
         r = r.wrapping_mul(1664525).wrapping_add(1013904223);
