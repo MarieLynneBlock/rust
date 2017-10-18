@@ -18,20 +18,20 @@ enum Cache {
 }
 
 fn binary_search<F>(b: &mut Bencher, cache: Cache, mapper: F)
-  where F: FnMut(usize) -> usize {
+    where F: Fn(usize) -> usize
+{
     let size = match cache {
         Cache::L1 => 1000, // 8kb
-        Cache::L2 => 10_000,  // 80kb
-        Cache::L3 => 1_000_000,  // 8Mb
+        Cache::L2 => 10_000, // 80kb
+        Cache::L3 => 1_000_000, // 8Mb
     };
-    let v = (0..size).map(mapper).collect::<Vec<_>>();
+    let v = (0..size).map(&mapper).collect::<Vec<_>>();
     let mut r = 0usize;
-    let max = *v.last().unwrap();
     b.iter(move || {
         // LCG constants from https://en.wikipedia.org/wiki/Numerical_Recipes.
         r = r.wrapping_mul(1664525).wrapping_add(1013904223);
         // Lookup the whole range to get 50% hits and 50% misses.
-        let i = r % max;
+        let i = mapper(r % size);
         black_box(v.binary_search(&i).is_ok());
     })
 }
