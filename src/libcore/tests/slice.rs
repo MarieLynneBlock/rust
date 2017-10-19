@@ -31,6 +31,12 @@ fn test_binary_search() {
     assert!(b.binary_search_by(|v| v.cmp(&0)) == Err(0));
     let b = [1, 2, 4, 5, 6, 8];
     assert!(b.binary_search_by(|v| v.cmp(&9)) == Err(6));
+    let b = [4];
+    assert!(b.binary_search_by(|v| v.cmp(&3)) == Err(0));
+    assert!(b.binary_search_by(|v| v.cmp(&4)) == Ok(0));
+    assert!(b.binary_search_by(|v| v.cmp(&5)) == Err(1));
+    let b: [i32; 0] = [];
+    assert!(b.binary_search_by(|v| v.cmp(&5)) == Err(0));
 }
 
 #[test]
